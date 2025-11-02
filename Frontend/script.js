@@ -4,11 +4,12 @@ let chaves = [];
 let intervalo = parseInt(document.getElementById('intervalo').value);
 
 const unidades = {
-    1: 'Segundos atrás',
-    60: 'Minutos atrás',
-    300: 'Minutos atrás',
-    1800: 'Horas atrás',
-    3600: 'Horas atrás'
+    1: 'Minutos atrás',
+    5: 'Minutos atrás',
+    10: 'Minutos atrás',
+    15: 'Minutos atrás',
+    30: 'Minutos atrás',
+    60: 'Horas atrás'
 };
 
 document.getElementById('intervalo').addEventListener('change', e => {
@@ -95,9 +96,7 @@ async function atualizarGraficos() {
 
     const labels = dadosFiltrados.map((_, i) => {
         const valor = (dadosFiltrados.length - 1 - i) * intervalo;
-        if(intervalo === 1) return valor + 's';
-        if(intervalo <= 300) return (valor / 60) + 'min';
-        return (valor / 3600) + 'h';
+        return intervalo >= 60 ? (valor / 60) + 'h' : valor + 'min';
     });
 
     chaves.forEach(chave => {
@@ -115,4 +114,4 @@ async function atualizarGraficos() {
 }
 
 atualizarGraficos();
-setInterval(atualizarGraficos, 2000);
+setInterval(atualizarGraficos, 60000); // atualizar a cada minuto
