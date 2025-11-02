@@ -82,7 +82,7 @@ function filtrarDadosPorIntervalo(dados, intervalo) {
 
 async function atualizarGraficos() {
     try {
-    const resposta = await fetch("http://localhost:3333");
+    const resposta = await fetch("https://alertasat.onrender.com");
     const json = await resposta.json();
     if (!Array.isArray(json) || json.length === 0) return;
 
