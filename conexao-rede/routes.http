@@ -1,0 +1,30 @@
+PUT http://localhost:3333/
+Content-Type: application/json
+
+{
+"temperatura": 1,
+"pressao": 1,
+"umidade": 1,
+"co2": 1,
+"tvoc": 1,
+"bateria": 1,
+"bateriaReal": 1
+}
+
+###
+GET http://localhost:3333/
+
+###
+
+POST http://localhost:3333/
+Content-Type: application/json
+
+{
+"temperatura": 1,
+"pressao": 1,
+"umidade": 1,
+"co2": 1,
+"tvoc": 1,
+"bateria": 1,
+"bateriaReal": 1
+}
