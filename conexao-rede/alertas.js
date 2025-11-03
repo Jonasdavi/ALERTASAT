@@ -212,14 +212,41 @@ export function atualizarAlertas(sensores) {
                     sensor,
                     nivel,
                     valor,
-                    explicacao: `✅ Sensor normalizado (${valor}). Alerta encerrado.`
+                    explicacao: `✅ Sensor normalizado (${valor}${getUnidade(sensor)}). Alerta encerrado.`
                 });
-                console.log(`✅ Sensor ${sensor} voltou ao normal`);
+                console.log(`✅ Sensor ${sensor} ${getUnidade(sensor)} voltou ao normal`);
             }
         }
     }
 
     if (alertasParaEnviar.length > 0) {
         exibirAlertas(alertasParaEnviar);
+    }
+}
+
+function getUnidade(sensor){
+    switch(sensor) {
+
+        // 🌡️ Temperatura
+        case "temperatura":
+            return `°C`;
+            
+
+        // 💧 Umidade relativa
+        case "umidade":
+            return `%`;
+            
+
+        // 🌬️ Pressão atmosférica
+        case "pressao":
+            return hPa
+
+        // 🫁 Dióxido de carbono (CO₂)
+        case "co2":
+            return `ppm`;
+
+        // ☣️ Compostos Orgânicos Voláteis Totais (tVOC)
+        case "tvoc":
+            return `ppb`;
     }
 }
