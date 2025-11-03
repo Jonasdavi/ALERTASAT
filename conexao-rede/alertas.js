@@ -7,65 +7,111 @@ let alertasAtivos = {};
 const REENVIO_INTERVALO = 30 * 60 * 1000; // 30 min
 
 // ==========================
-// Níveis de alerta
+// Níveis de alerta calibrados para Natal - RN / Nordeste
 // ==========================
 function nivelAlerta(sensor, valor) {
     switch(sensor) {
+
+        // 🌡️ Temperatura (°C)
+        // Média anual: 26–32°C. Extremos abaixo de 18°C ou acima de 38°C já são anormais.
         case "temperatura":
-            if (valor < 0 || valor > 40) return "CRITICAL";
-            if (valor < 5 || valor > 35) return "WARNING";
+            if (valor < 17 || valor > 38) return "CRITICAL";   // frio ou calor extremo
+            if (valor < 20 || valor > 35) return "WARNING";    // desconfortável
             return "NORMAL";
+
+        // 💧 Umidade relativa (%)
+        // Normalmente entre 60–85% no litoral. Abaixo de 40% é ar seco perigoso.
         case "umidade":
-            if (valor < 20 || valor > 90) return "CRITICAL";
-            if (valor < 30 || valor > 80) return "WARNING";
+            if (valor < 35 || valor > 95) return "CRITICAL";   // risco à saúde
+            if (valor < 45 || valor > 90) return "WARNING";    // desconfortável
             return "NORMAL";
+
+        // 🌬️ Pressão atmosférica (hPa)
+        // Média local ~1012 hPa. Abaixo de 1000 hPa indica instabilidade ou tempestade.
         case "pressao":
-            if (valor < 980) return "CRITICAL";
-            if (valor < 1000) return "WARNING";
+            if (valor < 995 || valor > 1025) return "CRITICAL"; // tempestade / frente forte
+            if (valor < 1005 || valor > 1020) return "WARNING"; // variação relevante
             return "NORMAL";
+
+        // 🫁 Dióxido de carbono (ppm)
+        // Ar puro: ~400 ppm. Ambientes fechados com >1000 ppm já causam sonolência.
         case "co2":
-            if (valor > 1000) return "CRITICAL";
-            if (valor > 800) return "WARNING";
+            if (valor > 1500) return "CRITICAL"; // ar irrespirável ou mau ventilado
+            if (valor > 1000) return "WARNING";  // ventilação insuficiente
             return "NORMAL";
+
+        // ☣️ Compostos orgânicos voláteis totais (tVOC, ppb)
+        // Ambientes urbanos costumam ter <200 ppb. >500 já é perigoso.
         case "tvoc":
-            if (valor > 500) return "CRITICAL";
-            if (valor > 300) return "WARNING";
+            if (valor > 800) return "CRITICAL";  // ar contaminado
+            if (valor > 400) return "WARNING";   // poluição moderada
             return "NORMAL";
+
         default:
             return "NORMAL";
     }
 }
 
+
 // ==========================
-// Explicação base por sensor
+// Explicação base por sensor — adaptada para Natal (RN) / Nordeste
 // ==========================
 function mensagemBase(sensor, valor, nivel) {
     switch(sensor) {
+
+        // 🌡️ Temperatura
         case "temperatura":
-            if (valor > 40) return `Calor extremo detectado (${valor}°C).`;
-            if (valor < 0) return `Frio intenso detectado (${valor}°C).`;
-            if (valor > 35) return `Temperatura elevada (${valor}°C).`;
-            if (valor < 5) return `Temperatura muito baixa (${valor}°C).`;
+            if (valor > 38)
+                return `🔥 Calor extremo detectado (${valor}°C). Risco de desidratação e superaquecimento. Evite exposição prolongada ao sol.`;
+            if (valor > 35)
+                return `🌞 Temperatura elevada (${valor}°C). Mantenha-se hidratado e em locais ventilados.`;
+            if (valor < 20)
+                return `🌤️ Temperatura mais baixa que o habitual (${valor}°C). Pode causar desconforto em ambientes abertos.`;
+            if (valor < 17)
+                return `🥶 Frio incomum detectado (${valor}°C). Pouco comum para a região litorânea.`;
             break;
+
+        // 💧 Umidade relativa
         case "umidade":
-            if (valor > 90) return `Umidade extremamente alta (${valor}%).`;
-            if (valor < 20) return `Umidade extremamente baixa (${valor}%).`;
-            if (valor > 80) return `Umidade acima do normal (${valor}%).`;
-            if (valor < 30) return `Umidade abaixo do normal (${valor}%).`;
+            if (valor > 95)
+                return `💦 Umidade extremamente alta (${valor}%). Pode favorecer mofo e desconforto térmico.`;
+            if (valor > 90)
+                return `🌫️ Umidade elevada (${valor}%). Sensação de abafamento e risco de proliferação de fungos.`;
+            if (valor < 35)
+                return `🌵 Ar muito seco (${valor}%). Risco de irritações respiratórias e desidratação.`;
+            if (valor < 45)
+                return `💨 Umidade baixa (${valor}%). Evite longas exposições e mantenha boa hidratação.`;
             break;
+
+        // 🌬️ Pressão atmosférica
         case "pressao":
-            if (valor < 980) return `Baixa pressão atmosférica (${valor} hPa).`;
-            if (valor < 1000) return `Pressão atmosférica reduzida (${valor} hPa).`;
+            if (valor < 995)
+                return `🌪️ Pressão muito baixa (${valor} hPa). Indica instabilidade atmosférica ou formação de tempestades.`;
+            if (valor < 1005)
+                return `🌧️ Pressão levemente baixa (${valor} hPa). Possibilidade de tempo nublado ou chuva.`;
+            if (valor > 1025)
+                return `🌤️ Pressão muito alta (${valor} hPa). Tempo estável e seco, comum em períodos de estiagem.`;
+            if (valor > 1020)
+                return `☀️ Pressão acima do normal (${valor} hPa). Indica tempo firme e seco.`;
             break;
+
+        // 🫁 Dióxido de carbono (CO₂)
         case "co2":
-            if (valor > 1000) return `Concentração de CO₂ perigosa (${valor} ppm).`;
-            if (valor > 800) return `Níveis de CO₂ elevados (${valor} ppm).`;
+            if (valor > 1500)
+                return `🚫 Concentração de CO₂ muito alta (${valor} ppm). Risco à saúde em locais fechados. Ventile o ambiente imediatamente.`;
+            if (valor > 1000)
+                return `⚠️ Nível de CO₂ elevado (${valor} ppm). Pode causar sonolência e desconforto. Recomenda-se ventilação.`;
             break;
+
+        // ☣️ Compostos Orgânicos Voláteis Totais (tVOC)
         case "tvoc":
-            if (valor > 500) return `Alta concentração de compostos voláteis (${valor} ppb).`;
-            if (valor > 300) return `Poluição leve do ar (${valor} ppb).`;
+            if (valor > 800)
+                return `☣️ Alta concentração de compostos voláteis (${valor} ppb). Pode indicar poluição do ar ou produtos químicos próximos.`;
+            if (valor > 400)
+                return `⚠️ Poluição leve do ar (${valor} ppb). Mantenha janelas abertas e evite fontes de fumaça.`;
             break;
     }
+
     return null;
 }
 
