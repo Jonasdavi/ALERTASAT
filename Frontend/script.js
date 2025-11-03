@@ -1,4 +1,6 @@
 
+import { atualizarAlertas } from "./alertasGmail.js";
+
 const graficos = {};
 let chaves = [];
 let intervalo = parseInt(document.getElementById('intervalo').value);
@@ -85,6 +87,9 @@ async function atualizarGraficos() {
     try {
     const resposta = await fetch("https://alertasat.onrender.com");
     const json = await resposta.json();
+
+    verificarAlertas(json)
+
     if (!Array.isArray(json) || json.length === 0) return;
 
     if (chaves.length === 0) {
@@ -115,3 +120,27 @@ async function atualizarGraficos() {
 
 atualizarGraficos();
 setInterval(atualizarGraficos, 60000); // atualizar a cada minuto
+
+
+
+function verificarAlertas(json){
+    // Exibe o JSON completo, formatado com quebras de linha
+    // pega apenas o primeiro objeto
+    if (json.length > 0) {
+        const ultimo = json[json.length - 1];
+        const novosDados = {
+            temperatura: 100,  // °C
+            umidade: ultimo["Umidade (UR)"],      // %
+            pressao: ultimo["Pressao (hPa)"],    // hPa
+            co2: ultimo["CO2 (ppm)"],         // ppm
+            tvoc: ultimo["TVOC (ppb)"],        // ppb
+
+        }
+        atualizarAlertas(novosDados)
+        alert(JSON.stringify(novosDados, null, 2));
+
+    } else {
+        alert("Nenhum dado disponível!");
+    }
+
+}

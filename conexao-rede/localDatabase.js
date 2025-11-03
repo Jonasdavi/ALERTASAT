@@ -1,3 +1,5 @@
+import { atualizarAlertas } from "./alertas.js";
+
 export class Sensores {
   #arrayDeObjetos;
   #tamanhoMaximo;
@@ -17,6 +19,7 @@ export class Sensores {
       // Remove o primeiro (mais antigo)
       this.#arrayDeObjetos.shift();
     }
+    atualizarAlertas(obj)
     this.#arrayDeObjetos.push(obj);
   }
 
