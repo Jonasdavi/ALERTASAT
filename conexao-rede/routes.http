@@ -12,15 +12,15 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:3333/
+GET https://alertasat.onrender.com
 
 ###
 
-POST http://localhost:3333/
+POST https://alertasat.onrender.com
 Content-Type: application/json
 
 {
-"temperatura": 1,
+"Pressao (hPa)": 1000,
 "pressao": 1,
 "umidade": 1,
 "co2": 1,

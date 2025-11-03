@@ -1,4 +1,7 @@
 import nodemailer from 'nodemailer';
+import { Resend } from "resend";
+
+const resend = new Resend('re_478fBjc4_EQSkAjRVN8cvVqMXjPtuKFdS');
 
 let alertasAtivos = {};
 const REENVIO_INTERVALO = 30 * 60 * 1000; // 30 min
@@ -69,29 +72,24 @@ function mensagemBase(sensor, valor, nivel) {
 // ==========================
 // Envio de e-mail
 // ==========================
-async function enviarEmail(destinatario, assunto, mensagem) {
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: 'expvax@gmail.com',
-            pass: 'gmqyknphmcqtuqev'
-        }
+
+const REMETENTE = "onboarding@resend.dev";
+
+export async function enviarEmail(destinatario, assunto, mensagem) {
+  try {
+    const result = await resend.emails.send({
+      from: REMETENTE,
+      to: destinatario,
+      subject: assunto, // agora usa o parâmetro passado
+      text: mensagem,
     });
 
-    const mailOptions = {
-        from: '"Alertasat" <expvax@gmail.com>',
-        to: destinatario,
-        subject: assunto,
-        text: mensagem
-    };
-
-    try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`📨 Email enviado (${assunto}) — ID: ${info.messageId}`);
-    } catch (error) {
-        console.error("❌ Erro ao enviar email:", error);
-    }
+    console.log("✅ Email enviado com sucesso!", result);
+  } catch (error) {
+    console.error("❌ Erro ao enviar email:", error);
+  }
 }
+
 
 // ==========================
 // Envia alerta agrupado com explicações
