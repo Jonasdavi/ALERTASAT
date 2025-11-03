@@ -19,7 +19,15 @@ export class Sensores {
       // Remove o primeiro (mais antigo)
       this.#arrayDeObjetos.shift();
     }
-    atualizarAlertas(obj)
+    const novosDados ={
+        temperatura: obj["Temperatura (C)"],  // °C
+        umidade: obj["Umidade (UR)"],      // %
+        pressao: obj["Pressao (hPa)"],    // hPa
+        co2: obj["CO2 (ppm)"],         // ppm
+        tvoc: obj["TVOC (ppb)"],        // ppb
+
+    }
+    atualizarAlertas(novosDados)
     this.#arrayDeObjetos.push(obj);
   }
 
