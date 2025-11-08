@@ -41,8 +41,8 @@ export class Sensores {
   dicionarDataHora(dados) {
   const agora = new Date();
 
-  const data = agora.toLocaleDateString("pt-BR"); // exemplo: 07/11/2025
-  const hora = agora.toLocaleTimeString("pt-BR"); // exemplo: 15:42:10
+  const data = agora.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+  const hora = agora.toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo" });
 
   // Cria uma cópia com os novos campos
   return {
