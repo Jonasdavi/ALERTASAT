@@ -1,119 +1,148 @@
-
-
 const graficos = {};
 let chaves = [];
 let intervalo = parseInt(document.getElementById('intervalo').value);
-
-const unidades = {
-    1: 'Minutos atrás',
-    5: 'Minutos atrás',
-    10: 'Minutos atrás',
-    15: 'Minutos atrás',
-    30: 'Minutos atrás',
-    60: 'Horas atrás'
-};
+let ultimoJson = null;
 
 document.getElementById('intervalo').addEventListener('change', e => {
-    intervalo = parseInt(e.target.value);
-    atualizarGraficos();
+  intervalo = parseInt(e.target.value);
+  atualizarGraficos();
 });
 
+function gerarCorAleatoria(alpha = 1) {
+  const r = Math.floor(Math.random() * 200);
+  const g = Math.floor(Math.random() * 200);
+  const b = Math.floor(Math.random() * 200);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function agruparVariaveis(chaves) {
+  const grupos = {};
+  chaves.forEach(chave => {
+    const match = chave.match(/^(.*?)([XYZxyz])\s*\(([^)]+)\)$/);
+    if (match) {
+      const base = match[1].trim();
+      const eixo = match[2].toUpperCase();
+      const unidade = match[3].trim();
+      const baseComUnidade = `${base} (${unidade})`;
+      if (!grupos[baseComUnidade]) grupos[baseComUnidade] = {};
+      grupos[baseComUnidade][eixo] = chave;
+    } else {
+      grupos[chave] = chave;
+    }
+  });
+  return grupos;
+}
+
+function filtrarDadosPorIntervalo(dados, intervalo) {
+  if (intervalo === 1) return dados;
+  const resultado = [];
+  for (let i = 0; i < dados.length; i += intervalo) {
+    resultado.push(dados[i]);
+  }
+  return resultado;
+}
+
 function criarGraficos(chaves) {
-    const container = document.getElementById("graficos");
-    container.innerHTML = "";
-    chaves.forEach(chave => {
+  const container = document.getElementById("graficos");
+  container.innerHTML = "";
+
+  const grupos = agruparVariaveis(chaves);
+
+  Object.entries(grupos).forEach(([base, valor]) => {
     const div = document.createElement("div");
     div.className = "grafico-container";
-    div.innerHTML = `<h2>${chave}</h2><canvas id="grafico_${chave}"></canvas>`;
+    div.innerHTML = `<h2>${base}</h2><canvas id="grafico_${base.replace(/\s+/g, "_")}"></canvas>`;
     container.appendChild(div);
 
-    const ctx = document.getElementById(`grafico_${chave}`).getContext("2d");
+    const ctx = document.getElementById(`grafico_${base.replace(/\s+/g, "_")}`).getContext("2d");
 
-    graficos[chave] = new Chart(ctx, {
-        type: "line",
-        data: { 
-        labels: [], 
-        datasets: [{
-            label: chave,
-            data: [],
-            borderColor: gerarCorAleatoria(),
-            backgroundColor: gerarCorAleatoria(0.2),
-            fill: false,
-            tension: 0.1
-        }]
-        },
-        options: {
+    let datasets;
+    if (typeof valor === "object") {
+      datasets = Object.entries(valor).map(([eixo, nomeVar]) => ({
+        label: eixo,
+        chave: nomeVar,
+        data: [],
+        borderColor: gerarCorAleatoria(),
+        backgroundColor: gerarCorAleatoria(0.2),
+        fill: false,
+        tension: 0.1
+      }));
+    } else {
+      datasets = [{
+        label: base,
+        chave: valor,
+        data: [],
+        borderColor: gerarCorAleatoria(),
+        backgroundColor: gerarCorAleatoria(0.2),
+        fill: false,
+        tension: 0.1
+      }];
+    }
+
+    graficos[base] = new Chart(ctx, {
+      type: "line",
+      data: { labels: [], datasets },
+      options: {
         responsive: true,
         maintainAspectRatio: true,
         animation: false,
         plugins: {
-            legend: { labels: { color: '#fff' } }
+          legend: { labels: { color: '#fff' } }
         },
         scales: {
-            x: { 
-            title: { display: true, text: unidades[intervalo], color: '#fff' },
+          x: {
+            title: { display: true, text: "Horário (HH:MM:SS)", color: '#fff' },
             ticks: { color: '#fff' },
             grid: { color: 'rgba(255,255,255,0.1)' }
-            },
-            y: { 
+          },
+          y: {
             title: { display: true, text: "Valor", color: '#fff' },
             ticks: { color: '#fff' },
             grid: { color: 'rgba(255,255,255,0.1)' }
-            }
+          }
         }
-        }
+      }
     });
-    });
-}
-
-function gerarCorAleatoria(alpha = 1) {
-    const r = Math.floor(Math.random() * 200);
-    const g = Math.floor(Math.random() * 200);
-    const b = Math.floor(Math.random() * 200);
-    return `rgba(${r},${g},${b},${alpha})`;
-}
-
-function filtrarDadosPorIntervalo(dados, intervalo) {
-    if(intervalo === 1) return dados;
-    const resultado = [];
-    for(let i = 0; i < dados.length; i += intervalo) {
-    resultado.push(dados[i]);
-    }
-    return resultado;
+  });
 }
 
 async function atualizarGraficos() {
-    try {
+  try {
     const resposta = await fetch("https://alertasat.onrender.com");
     const json = await resposta.json();
 
     if (!Array.isArray(json) || json.length === 0) return;
 
-    if (chaves.length === 0) {
-        chaves = Object.keys(json[0]);
-        criarGraficos(chaves);
-    }
+    const jsonStr = JSON.stringify(json);
+    if (jsonStr === ultimoJson) return;
+    ultimoJson = jsonStr;
 
     const dadosFiltrados = filtrarDadosPorIntervalo(json, intervalo);
 
-    const labels = dadosFiltrados.map((_, i) => {
-        const valor = (dadosFiltrados.length - 1 - i) * intervalo;
-        return intervalo >= 60 ? (valor / 60) + 'h' : valor + 'min';
+    // define chaves se for o primeiro carregamento
+    if (chaves.length === 0) {
+      chaves = Object.keys(json[0]).filter(
+        c => c.toLowerCase() !== "data" && c.toLowerCase() !== "hora"
+      );
+      criarGraficos(chaves);
+    }
+
+    // cria labels com base em data + hora
+    const labels = dadosFiltrados.map(item => `${item.data} ${item.hora}`);
+
+    // atualiza gráficos
+    Object.entries(graficos).forEach(([base, chart]) => {
+      chart.data.labels = labels;
+      chart.data.datasets.forEach(ds => {
+        ds.data = dadosFiltrados.map(item => item[ds.chave]);
+      });
+      chart.update();
     });
 
-    chaves.forEach(chave => {
-        const grafico = graficos[chave];
-        if (grafico) {
-        grafico.data.labels = labels;
-        grafico.data.datasets[0].data = dadosFiltrados.map(item => item[chave]);
-        grafico.options.scales.x.title.text = unidades[intervalo];
-        grafico.update();
-        }
-    });
-    } catch (erro) {
+  } catch (erro) {
     console.error("Erro ao buscar dados:", erro);
-    }
+  }
 }
 
 atualizarGraficos();
-setInterval(atualizarGraficos, 60000); // atualizar a cada minuto
+setInterval(atualizarGraficos, 60000);

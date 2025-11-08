@@ -35,5 +35,21 @@ export class Sensores {
   get() {
     return this.#arrayDeObjetos;
   }
+
+
+  // Função que adiciona data e hora atuais ao JSON
+  dicionarDataHora(dados) {
+  const agora = new Date();
+
+  const data = agora.toLocaleDateString("pt-BR"); // exemplo: 07/11/2025
+  const hora = agora.toLocaleTimeString("pt-BR"); // exemplo: 15:42:10
+
+  // Cria uma cópia com os novos campos
+  return {
+    ...dados, // mantém os dados originais
+    data,
+    hora
+  };
+}
 }
 

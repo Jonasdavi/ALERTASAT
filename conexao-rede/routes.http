@@ -20,11 +20,11 @@ POST https://alertasat.onrender.com
 Content-Type: application/json
 
 {
-"Pressao (hPa)": 1000,
-"pressao": 1,
-"umidade": 1,
-"co2": 1,
-"tvoc": 1,
-"bateria": 1,
-"bateriaReal": 1
-}
+    "data": "07/11/2025",
+    "hora": "14:42:10",
+    "bmp Pressao (hPa)": 1012.3,
+    "dht Temperatura (*C)": 32.4,
+    "mpu Aceleracao X (g)": -0.03,
+    "mpu Aceleracao Y (g)": 0.11,
+    "mpu Aceleracao Z (g)": 9.8
+  }

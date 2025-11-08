@@ -10,13 +10,15 @@ server.register(fastifyCors, { origin: '*' });
 
 server.post('/', (req, rep) => {
     database.reiniciar();
-    database.add(req.body);
+    const obj = database.dicionarDataHora(req.body)
+    database.add(obj);
     ultimoTimestamp = Date.now();
     return rep.send();
 });
 
 server.put('/', (req, rep) => {
-    database.add(req.body);
+    const obj = database.dicionarDataHora(req.body)
+    database.add(obj);
     ultimoTimestamp = Date.now();
     return rep.send();
 });
@@ -26,13 +28,13 @@ server.get('/', (req, rep) => {
 });
 
 // Loop para verificar inatividade
-setInterval(() => {
-    const agora = Date.now();
-    if (agora - ultimoTimestamp > 3 * 60 * 1000) { // 3 minutos
-        console.log('Mais de 3 minutos sem atualização. Reiniciando histórico...');
-        database.reiniciar();
-    }
-}, 30 * 1000); // checa a cada 30 segundos
+// setInterval(() => {
+//     const agora = Date.now();
+//     if (agora - ultimoTimestamp > 2 * 60 * 1000) { // 2 minutos
+//         console.log('Mais de 2 minutos sem atualização. Reiniciando histórico...');
+//         database.reiniciar();
+//     }
+// }, 30 * 1000); // checa a cada 30 segundos
 
 server.listen({
     host: '0.0.0.0',

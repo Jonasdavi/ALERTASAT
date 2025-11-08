@@ -9,8 +9,13 @@
   <meta http-equiv="refresh" content="60">
 </head>
 <body>
-  <h1>Alertasat - Graficos em tempo real</h1>
-  
+  <h1>Alertasat - Gráficos em tempo real</h1>
+
+  <!-- 🕒 Nova linha para exibir data/hora -->
+  <div id="info-data" style="color:#ccc; font-size:0.9rem; margin-bottom:15px;">
+    Aguardando dados...
+  </div>
+
   <div class="seletores">
     Exibir a cada: 
     <select id="intervalo">
@@ -26,6 +31,5 @@
   <div id="graficos"></div>
 
   <script type="module" src="script.js"></script>
-
 </body>
 </html>
