@@ -91,7 +91,7 @@ function criarGraficos(chaves) {
         },
         scales: {
           x: {
-            title: { display: true, text: "Horário (HH:MM:SS)", color: '#fff' },
+            title: { display: true, text: "Horário (HH:MM)", color: '#fff' },
             ticks: { color: '#fff' },
             grid: { color: 'rgba(255,255,255,0.1)' }
           },
@@ -106,6 +106,13 @@ function criarGraficos(chaves) {
   });
 }
 
+
+function atualizarInfoData(data) {
+  const infoDiv = document.getElementById("info-data");
+  infoDiv.textContent = `Data inicial: ${data}`;
+}
+
+
 async function atualizarGraficos() {
   try {
     const resposta = await fetch("https://alertasat.onrender.com");
@@ -119,6 +126,12 @@ async function atualizarGraficos() {
 
     const dadosFiltrados = filtrarDadosPorIntervalo(json, intervalo);
 
+    // Atualiza a info de data usando o primeiro ponto
+    const primeiroItem = dadosFiltrados[0];
+    if (primeiroItem.data) {
+      atualizarInfoData(primeiroItem.data);
+    }
+
     // define chaves se for o primeiro carregamento
     if (chaves.length === 0) {
       chaves = Object.keys(json[0]).filter(
@@ -128,7 +141,7 @@ async function atualizarGraficos() {
     }
 
     // cria labels com base em data + hora
-    const labels = dadosFiltrados.map(item => `${item.data} ${item.hora}`);
+    const labels = dadosFiltrados.map(item => `${item.hora}`);
 
     // atualiza gráficos
     Object.entries(graficos).forEach(([base, chart]) => {
